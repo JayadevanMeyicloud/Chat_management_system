@@ -20,7 +20,9 @@ phases:
       - sam build --template-file devops/template.yaml
       - ls .aws-sam/build/
       - sam package --template-file .aws-sam/build/template.yaml --output-template-file ./packaged.yaml --s3-bucket $SAM_ARTIFACTS_BUCKET --s3-prefix chat-management-api --region ap-south-1
-
+      - echo "checking packaged.yaml location"
+      - ls -la packaged.yaml
+      - pwd
   post_build:
     commands:
       - |
