@@ -1,6 +1,6 @@
 import json
 
-from app.repository.user_repository import (
+from app.services.users.repository.user_repository import (
     get_user_by_cognito_sub
 )
 

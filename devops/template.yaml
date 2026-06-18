@@ -1,0 +1,143 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: Chat Management API
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+
+  DatabaseUrl:
+    Type: String
+
+  SecretKey:
+    Type: String
+    NoEcho: true
+
+Resources:
+
+  PsycopgLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "psycopg-layer-${Stage}"
+      ContentUri: layers/common/psycopg
+      CompatibleRuntimes:
+        - python3.12
+      RetentionPolicy: Retain
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "chat-management-userpool-${Stage}"
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "chat-management-client-${Stage}"
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+
+  ChatApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "chat-management-api-${Stage}"
+      StageName: !Ref Stage
+      OpenApiVersion: 3.0.1
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !GetAtt CognitoUserPool.Arn
+
+  AuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "chat-auth-lambda-${Stage}"
+      Runtime: python3.12
+      Timeout: 30
+      MemorySize: 512
+      CodeUri: ./
+      Handler: app.services.users.service.cognito_lambda_handler.lambda_handler
+
+      Layers:
+        - !Ref PsycopgLayer
+
+      Environment:
+        Variables:
+          STAGE: !Ref Stage
+          DATABASE_URL: !Ref DatabaseUrl
+          SECRET_KEY: !Ref SecretKey
+          USER_POOL_ID: !Ref CognitoUserPool
+          CLIENT_ID: !Ref CognitoUserPoolClient
+
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:SignUp
+                - cognito-idp:AdminConfirmSignUp
+                - cognito-idp:AdminGetUser
+                - cognito-idp:AdminInitiateAuth
+                - cognito-idp:GlobalSignOut
+              Resource: !GetAtt CognitoUserPool.Arn
+
+      Events:
+        Login:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/login
+            Method: post
+            RestApiId: !Ref ChatApi
+            Auth:
+              Authorizer: NONE
+
+        CreateUser:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/users
+            Method: post
+            RestApiId: !Ref ChatApi
+            Auth:
+              Authorizer: NONE
+
+        GetUser:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/users/{user_id}
+            Method: get
+            RestApiId: !Ref ChatApi
+
+        Verify:
+          Type: Api
+          Properties:
+            Path: /api/v1/auth/verify
+            Method: post
+            RestApiId: !Ref ChatApi
+            Auth:
+              Authorizer: NONE
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${ChatApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
+
+  UserPoolId:
+    Value: !Ref CognitoUserPool
+
+  UserPoolClientId:
+    Value: !Ref CognitoUserPoolClient

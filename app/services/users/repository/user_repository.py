@@ -69,3 +69,4 @@ def get_user_by_cognito_sub(cognito_sub):
 
     finally:
         connection.close()
+        

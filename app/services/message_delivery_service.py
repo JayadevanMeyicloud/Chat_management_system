@@ -1,16 +1,16 @@
-from repository.delivery_repository import get_message_type
+from app.repository.message_delivery_repository import get_message_type
 
-from repository.group_delivery_repository import (
+from app.repository.group_delivery_repository import (
     update_group_delivery_status,
     get_group_delivery_report
 )
 
-from repository.direct_delivery_repository import (
+from app.repository.direct_delivery_repository import (
     update_direct_delivery_status,
     get_direct_delivery_report
 )
 
-from utils.exceptions import (
+from app.utils.exceptions import (
     MessageNotFoundError,
     InvalidDeliveryStatusError,
     DeliveryAccessDeniedError,

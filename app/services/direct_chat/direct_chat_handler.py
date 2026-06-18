@@ -1,20 +1,24 @@
 import json
 
-from app.services.users.repository.user_repository import get_user_by_cognito_sub
+# from app.services.users.repository.user_repository import (
+#     get_user_by_cognito_sub
+# )
 
-from app.services.message_delivery_service import (
-    update_delivery,
-    fetch_delivery_report
+from app.services.direct_chat.repository.direct_chat_repository import (
+    get_user_by_cognito_sub
+)
+from app.services.direct_chat.service.direct_chat_service import (
+    create_chat,
+    fetch_direct_chats
 )
 
 from app.utils.response_handler import create_response
 from app.utils.logger import get_logger
 
 from app.utils.exceptions import (
-    MessageNotFoundError,
-    InvalidDeliveryStatusError,
-    DeliveryAccessDeniedError,
-    DeliveryRecordNotFoundError
+    DirectChatAlreadyExistsError,
+    SelfChatNotAllowedError,
+    ChatAccessDeniedError
 )
 
 logger = get_logger(__name__)
@@ -36,68 +40,62 @@ def lambda_handler(event, context):
         cognito_sub = claims["sub"]
 
         current_user = get_user_by_cognito_sub(cognito_sub)
-
         current_user_id = str(current_user[0])
-        current_user_role = current_user[4]
 
         body = event.get("body") or "{}"
 
         if isinstance(body, str):
             body = json.loads(body)
 
-        path_parameters = event.get("pathParameters") or {}
-
-        message_id = path_parameters.get("message_id")
-
-        # UPDATE DELIVERY STATUS
+        # CREATE DIRECT CHAT
         if (
-            path == f"/api/v1/message/delivery/{message_id}"
-            and method == "PATCH"
+            path == "/api/v1/direct-chats"
+            and method == "POST"
         ):
 
-            response = update_delivery(
-                message_id,
+            logger.info({
+                "event": "create_direct_chat_requested",
+                "receiver_id": body.get("receiver_id")
+            })
+
+            response = create_chat(
                 current_user_id,
-                body["status"]
+                body["receiver_id"]
             )
 
             logger.info({
-                "event": "delivery_updated",
-                "message_id": message_id,
+                "event": "direct_chat_created",
                 "user_id": current_user_id
             })
 
             return create_response(
-                200,
-                "Delivery status updated successfully",
+                201,
+                "Direct chat created successfully",
                 {
-                    "delivery": response
+                    "chat": response
                 }
             )
 
-        # GET DELIVERY REPORT
+        # GET DIRECT CHATS
         if (
-            path == f"/api/v1/message/delivery/{message_id}/report"
+            path == "/api/v1/direct-chats"
             and method == "GET"
         ):
 
-            response = fetch_delivery_report(
-                message_id,
-                current_user_id,
-                current_user_role
+            response = fetch_direct_chats(
+                current_user_id
             )
 
             logger.info({
-                "event": "delivery_report_fetched",
-                "message_id": message_id,
+                "event": "direct_chats_fetched",
                 "user_id": current_user_id
             })
 
             return create_response(
                 200,
-                "Delivery report fetched successfully",
+                "Direct chats fetched successfully",
                 {
-                    "report": response
+                    "chats": response
                 }
             )
 
@@ -113,10 +111,9 @@ def lambda_handler(event, context):
         )
 
     except (
-        MessageNotFoundError,
-        InvalidDeliveryStatusError,
-        DeliveryAccessDeniedError,
-        DeliveryRecordNotFoundError
+        DirectChatAlreadyExistsError,
+        SelfChatNotAllowedError,
+        ChatAccessDeniedError
     ) as e:
 
         logger.error({

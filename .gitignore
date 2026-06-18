@@ -216,3 +216,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Build folders
+*/build/*
+
+# AWS SAM
+.aws-sam/
+
+# SAM Config
+samconfig.toml
+
+# Lambda layer generated packages
+layers/common/psycopg/python/
+
+# Python virtual env
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc

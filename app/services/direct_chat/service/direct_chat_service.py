@@ -1,10 +1,10 @@
-from repository.direct_chat_repository import (
+from app.services.direct_chat.repository.direct_chat_repository import (
     get_existing_chat,
     create_direct_chat,
     get_direct_chats
 )
 
-from utils.exceptions import (
+from app.utils.exceptions import (
     DirectChatAlreadyExistsError,
     SelfChatNotAllowedError
 )

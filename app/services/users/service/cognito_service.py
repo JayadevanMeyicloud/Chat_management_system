@@ -1,10 +1,10 @@
 
 import boto3
 
-from core.config import CLIENT_ID
-from repository.user_repository import create_user
+from app.core.config import CLIENT_ID
+from app.services.users.repository.user_repository import create_user
 
-from utils.exceptions import (
+from app.utils.exceptions import (
     UserAlreadyExistsError,
     InvalidCredentialsError,
     InvalidPasswordError,

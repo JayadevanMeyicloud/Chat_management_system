@@ -1,13 +1,13 @@
 
 import json
 
-from app.repository.user_repository import get_user_by_cognito_sub
-from app.services.direct_chat_service import (
+from app.services.users.repository.user_repository import get_user_by_cognito_sub
+from app.services.direct_chat.service.direct_chat_service import (
     create_chat,
     fetch_direct_chats
 )
 
-from app.services.direct_message_service import (
+from app.services.direct_message.service.direct_message_service import (
     send_message,
     fetch_message,
     remove_message

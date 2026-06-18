@@ -1,6 +1,6 @@
-from repository.group_repository import get_group_by_id, get_group_members
-from repository.groupMember_repository import is_group_member
-from repository.groupMessage_repository import (
+from app.services.groups.repository.group_repository import get_group_by_id, get_group_members
+from app.repository.groupMember_repository import is_group_member
+from app.repository.groupMessage_repository import (
     is_duplicate_message,
     create_message,
     get_messages,
@@ -9,7 +9,7 @@ from repository.groupMessage_repository import (
     create_delivery_records
 )
 
-from utils.exceptions import (
+from app.utils.exceptions import (
     GroupNotFoundError,
     GroupMembershipRequiredError,
     GroupMessageNotFoundError,

@@ -1,0 +1,153 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+
+  ChatUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: Chat-User-Pool
+
+      AutoVerifiedAttributes:
+        - email
+
+      UsernameAttributes:
+        - email
+
+  ChatUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: Chat-User-Pool-Client
+
+      UserPoolId: !Ref ChatUserPool
+
+      GenerateSecret: false
+
+  AuthLambdaRole:
+    Type: AWS::IAM::Role
+
+    Properties:
+      RoleName: cf-auth-lambda-role
+      Policies:
+      - PolicyName: CognitoPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                  - cognito-idp:*
+              Resource: "*"
+
+
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  AuthLambda:
+    Type: AWS::Lambda::Function 
+    Properties:
+      FunctionName: cf-auth-lambda
+      Environment:
+        Variables:
+          CLIENT_ID: !Ref ChatUserPoolClient
+
+      Runtime: python3.13
+
+      Handler: index.lambda_handler
+
+      Role: !GetAtt AuthLambdaRole.Arn
+
+      Timeout: 10
+
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+
+          cognito = boto3.client("cognito-idp")
+
+          CLIENT_ID = os.environ["CLIENT_ID"]
+
+          def lambda_handler(event, context):
+
+              body = json.loads(event["body"])
+
+              email = body["email"]
+              password = body["password"]
+
+              response = cognito.sign_up(
+              ClientId=CLIENT_ID,
+              Username=email,
+              Password=password,
+              UserAttributes=[
+                  {
+                      "Name": "email",
+                      "Value": email
+                  }
+              ]
+          )
+
+              return {
+                  "statusCode": 200,
+                  "body": json.dumps({
+                      "message": "User registered successfully"
+                  })
+              }
+
+  AuthApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: ChatAuthAPI
+      ProtocolType: HTTP
+
+  AuthIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref AuthApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AuthLambda.Arn}/invocations
+      PayloadFormatVersion: "2.0"
+
+  AuthRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref AuthApi
+      RouteKey: "GET /hello"
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref AuthIntegration
+
+  RegisterRoute :
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref AuthApi
+      RouteKey: "POST /register"
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref AuthIntegration
+
+
+  AuthStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref AuthApi
+      StageName: dev
+      AutoDeploy: true
+
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref AuthLambda
+      Principal: apigateway.amazonaws.com

@@ -1,6 +1,24 @@
 from core.database import get_connection
 
+def get_user_by_cognito_sub(cognito_sub):
+    connection = get_connection()
 
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                SELECT *
+                FROM users
+                WHERE cognito_sub = %s
+                """,
+                (cognito_sub,)
+            )
+
+            return cursor.fetchone()
+
+    finally:
+        connection.close()
 def get_existing_chat(user1_id, user2_id):
     connection = get_connection()
 

@@ -1,6 +1,6 @@
 import json
 
-from app.services.cognito_service import register_user, verify_otp, login_user
+from app.services.users.service.cognito_service import register_user, verify_otp, login_user
 from app.utils.response_handler import create_response
 from app.utils.logger import get_logger
 from app.utils.exceptions import (
@@ -10,7 +10,7 @@ from app.utils.exceptions import (
     InvalidCredentialsError,
     UserNotFoundError
 )
-from app.services.user_service import fetch_user
+from app.services.users.service.user_service import fetch_user
 
 logger = get_logger(__name__)
 

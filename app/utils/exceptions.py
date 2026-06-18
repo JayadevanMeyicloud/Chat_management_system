@@ -120,12 +120,6 @@ class MessageDeleteForbiddenError(Exception):
         super().__init__(
             "Forbidden. You can only delete your own messages"
         )
-        
-class MessageNotFoundError(Exception):
-    status_code = 404
-
-    def __init__(self):
-        super().__init__("Message not found")
 
 
 class InvalidDeliveryStatusError(Exception):
@@ -147,3 +141,22 @@ class DeliveryRecordNotFoundError(Exception):
 
     def __init__(self):
         super().__init__("Delivery record not found")
+        
+class AdminOnlyActionError(Exception):
+    status_code = 403
+
+    def __init__(self):
+        super().__init__("Only admins can perform this action")
+
+
+class GroupAlreadyExistsError(Exception):
+    status_code = 409
+
+    def __init__(self):
+        super().__init__("Group already exists")
+
+class GroupAccessDeniedError(Exception):
+    status_code = 403
+
+    def __init__(self):
+        super().__init__("Access denied")

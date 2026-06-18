@@ -1,9 +1,9 @@
-from repository.direct_chat_repository import (
+from app.services.direct_chat.repository.direct_chat_repository import (
     is_chat_participant,
     get_chat_receiver
 )
 
-from repository.direct_message_repository import (
+from app.services.direct_message.repository.direct_message_repository import (
     check_duplicate_message,
     create_direct_message,
     get_direct_messages,
@@ -12,7 +12,7 @@ from repository.direct_message_repository import (
     create_delivery_record
 )
 
-from utils.exceptions import (
+from app.utils.exceptions import (
     ChatAccessDeniedError,
     DuplicateMessageError,
     MessageNotFoundError,
