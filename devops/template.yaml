@@ -21,7 +21,7 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub "psycopg-layer-${Stage}"
-      ContentUri: layers/common/psycopg
+      ContentUri: ../layers/common/psycopg
       CompatibleRuntimes:
         - python3.12
       RetentionPolicy: Retain
@@ -71,7 +71,7 @@ Resources:
       Runtime: python3.12
       Timeout: 30
       MemorySize: 512
-      CodeUri: ./
+      CodeUri: ../
       Handler: app.services.users.service.cognito_lambda_handler.lambda_handler
 
       Layers:
