@@ -12,13 +12,13 @@ phases:
       - pwd
       - ls
       - sam validate --template-file devops/template.yaml
+      - mkdir -p layers/common/psycopg/python
+      - pip install psycopg[binary] -t layers/common/psycopg/python/
 
   build:
     commands:
       - sam build --template-file devops/template.yaml
-
       - ls .aws-sam/build/
-
       - sam package --template-file .aws-sam/build/template.yaml --output-template-file packaged.yaml --s3-bucket $SAM_ARTIFACTS_BUCKET --s3-prefix chat-management-api --region ap-south-1
 
   post_build:
