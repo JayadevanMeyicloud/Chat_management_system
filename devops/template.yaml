@@ -82,9 +82,9 @@ Resources:
     Properties:
       FunctionName: !Sub "chat-auth-lambda-${Stage}"
 
-      CodeUri: ../app
+      CodeUri: ../app/services/users
 
-      Handler: services.users.cognito_lambda_handler.lambda_handler
+      Handler: cognito_lambda_handler.lambda_handler
 
       Layers:
         - !Ref PsycopgLayer

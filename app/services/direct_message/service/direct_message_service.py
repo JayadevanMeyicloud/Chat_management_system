@@ -12,7 +12,7 @@ from app.services.direct_message.repository.direct_message_repository import (
     create_delivery_record
 )
 
-from app.utils.exceptions import (
+from layers.common.psycopg.python.utils.exceptions import (
     ChatAccessDeniedError,
     DuplicateMessageError,
     MessageNotFoundError,

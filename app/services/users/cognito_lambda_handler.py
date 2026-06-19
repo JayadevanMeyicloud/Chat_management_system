@@ -1,16 +1,37 @@
 import json
 
-from app.services.users.service.cognito_service import register_user, verify_otp, login_user
-from app.utils.response_handler import create_response
-from app.utils.logger import get_logger
-from app.utils.exceptions import (
+# from app.services.users.service.cognito_service import register_user, verify_otp, login_user
+# from layers.common.psycopg.python.utils.response_handler import create_response
+# from layers.common.psycopg.python.utils.logger import get_logger
+# from layers.common.psycopg.python.utils.exceptions import (
+#     UserAlreadyExistsError,
+#     InvalidPasswordError,
+#     InvalidRequestError,
+#     InvalidCredentialsError,
+#     UserNotFoundError
+# )
+# from app.services.users.service.user_service import fetch_user
+
+from service.cognito_service import (
+    register_user,
+    verify_otp,
+    login_user
+)
+
+from service.user_service import (
+    fetch_user
+)
+
+from utils.response_handler import create_response
+from utils.logger import get_logger
+
+from utils.exceptions import (
     UserAlreadyExistsError,
     InvalidPasswordError,
     InvalidRequestError,
     InvalidCredentialsError,
     UserNotFoundError
 )
-from app.services.users.service.user_service import fetch_user
 
 logger = get_logger(__name__)
 

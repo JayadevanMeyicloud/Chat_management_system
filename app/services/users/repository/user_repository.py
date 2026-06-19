@@ -1,5 +1,6 @@
-from core.database import get_connection
+# from layers.common.psycopg.python.core.database import get_connection
 
+from core.database import get_connection
 
 def create_user(cognito_sub, name, email):
     connection = get_connection()

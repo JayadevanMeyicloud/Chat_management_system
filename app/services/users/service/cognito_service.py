@@ -1,10 +1,20 @@
 
 import boto3
 
-from app.core.config import CLIENT_ID
-from app.services.users.repository.user_repository import create_user
+# from layers.common.psycopg.python.core.config import CLIENT_ID
+# from app.services.users.repository.user_repository import create_user
 
-from app.utils.exceptions import (
+# from layers.common.psycopg.python.utils.exceptions import (
+#     UserAlreadyExistsError,
+#     InvalidCredentialsError,
+#     InvalidPasswordError,
+#     InvalidRequestError
+# )
+from core.config import CLIENT_ID
+
+from repository.user_repository import create_user
+
+from utils.exceptions import (
     UserAlreadyExistsError,
     InvalidCredentialsError,
     InvalidPasswordError,

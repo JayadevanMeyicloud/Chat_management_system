@@ -10,15 +10,15 @@ from app.services.group_member.service.groupMember_service import (
     remove_member
 )
 
-from utils.response_handler import (
+from layers.common.psycopg.python.utils.response_handler import (
     create_response
 )
 
-from utils.logger import (
+from layers.common.psycopg.python.utils.logger import (
     get_logger
 )
 
-from utils.exceptions import (
+from layers.common.psycopg.python.utils.exceptions import (
     GroupNotFoundError,
     GroupAccessDeniedError,
     UserNotFoundError,

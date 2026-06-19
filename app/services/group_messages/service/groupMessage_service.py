@@ -11,7 +11,7 @@ from app.services.group_messages.repository.groupMessage_repository import (
     is_group_member
 )
 
-from app.utils.exceptions import (
+from layers.common.psycopg.python.utils.exceptions import (
     GroupNotFoundError,
     GroupMembershipRequiredError,
     GroupMessageNotFoundError,

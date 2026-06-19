@@ -1,4 +1,4 @@
-from core.database import get_connection
+from layers.common.psycopg.python.core.database import get_connection
 
 
 def update_direct_delivery_status(

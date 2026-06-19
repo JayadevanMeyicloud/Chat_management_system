@@ -10,7 +10,7 @@ from app.services.message_delivery_status.repository.direct_delivery_repository 
     get_direct_delivery_report
 )
 
-from app.utils.exceptions import (
+from layers.common.psycopg.python.utils.exceptions import (
     MessageNotFoundError,
     InvalidDeliveryStatusError,
     DeliveryAccessDeniedError,

@@ -4,7 +4,7 @@ from app.services.direct_chat.repository.direct_chat_repository import (
     get_direct_chats
 )
 
-from app.utils.exceptions import (
+from layers.common.psycopg.python.utils.exceptions import (
     DirectChatAlreadyExistsError,
     SelfChatNotAllowedError
 )

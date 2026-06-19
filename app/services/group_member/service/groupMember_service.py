@@ -9,7 +9,7 @@ from app.services.group_member.repository.groupMember_repository import (
 )
 
 
-from utils.exceptions import (
+from layers.common.psycopg.python.utils.exceptions import (
     GroupNotFoundError,
     GroupAccessDeniedError,
     UserNotFoundError,
