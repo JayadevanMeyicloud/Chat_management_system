@@ -10,11 +10,11 @@ from app.services.group_member.service.groupMember_service import (
     remove_member
 )
 
-from layers.common.psycopg.python.utils.response_handler import (
+from app.utils.response_handler import (
     create_response
 )
 
-from layers.common.psycopg.python.utils.logger import (
+from app.utils.logger import (
     get_logger
 )
 

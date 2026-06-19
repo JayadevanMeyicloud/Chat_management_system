@@ -12,8 +12,8 @@ from app.services.direct_chat.service.direct_chat_service import (
     fetch_direct_chats
 )
 
-from layers.common.psycopg.python.utils.response_handler import create_response
-from layers.common.psycopg.python.utils.logger import get_logger
+from app.utils.response_handler import create_response
+from app.utils.logger import get_logger
 
 from layers.common.psycopg.python.utils.exceptions import (
     DirectChatAlreadyExistsError,

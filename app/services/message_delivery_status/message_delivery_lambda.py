@@ -7,8 +7,8 @@ from app.services.message_delivery_status.service.message_delivery_service impor
     fetch_delivery_report
 )
 
-from layers.common.psycopg.python.utils.response_handler import create_response
-from layers.common.psycopg.python.utils.logger import get_logger
+from app.utils.response_handler import create_response
+from app.utils.logger import get_logger
 
 from layers.common.psycopg.python.utils.exceptions import (
     MessageNotFoundError,
