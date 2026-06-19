@@ -27,7 +27,7 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub "psycopg-layer-${Stage}"
-      ContentUri: ../layers/common/psycopg
+      ContentUri: ../layers/common
       CompatibleRuntimes:
         - python3.12
       RetentionPolicy: Retain

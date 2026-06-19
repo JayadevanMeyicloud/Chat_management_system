@@ -12,10 +12,10 @@ phases:
       - pwd
       - ls
       - sam validate --template-file devops/template.yaml
-      - mkdir -p layers/common/psycopg/python
+      - mkdir -p layers/common/python
       - cp -r app/core layers/common/python
       - cp -r app/utils layers/common/python
-      - pip install psycopg[binary] -t layers/common/psycopg/python/
+      - pip install psycopg[binary] -t layers/common/python/
 
   build:
     commands:
