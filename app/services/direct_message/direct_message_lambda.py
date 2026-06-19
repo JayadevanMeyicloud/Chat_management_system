@@ -14,7 +14,7 @@ from service.direct_message_service import (
 )
 
 from utils.response_handler import create_response
-from app.utils.logger import get_logger
+from utils.logger import get_logger
 
 from utils.exceptions import (
     DirectChatAlreadyExistsError,
