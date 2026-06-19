@@ -1,8 +1,0 @@
-AWSTemplateFormatVersion: '2010-09-09'
-
-Resources:
-
-  MyFirstBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: jayadevan-cf-practice-bucket_01
