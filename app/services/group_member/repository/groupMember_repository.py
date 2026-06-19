@@ -65,6 +65,28 @@ def get_group_by_id(group_id):
     finally:
         connection.close()
         
+# def get_group_members(group_id):
+#     connection = get_connection()
+
+#     try:
+#         with connection.cursor() as cursor:
+
+#             cursor.execute(
+#                 """
+#                 SELECT user_id
+#                 FROM group_members
+#                 WHERE group_id = %s
+#                 """,
+#                 (group_id,)
+#             )
+
+#             return [
+#                 str(member[0])
+#                 for member in cursor.fetchall()
+#             ]
+
+#     finally:
+#         connection.close()
 def get_group_members(group_id):
     connection = get_connection()
 
@@ -73,15 +95,24 @@ def get_group_members(group_id):
 
             cursor.execute(
                 """
-                SELECT user_id
-                FROM group_members
-                WHERE group_id = %s
+                SELECT
+                    u.id,
+                    u.name,
+                    u.email
+                FROM group_members gm
+                JOIN users u
+                    ON gm.user_id = u.id
+                WHERE gm.group_id = %s
                 """,
                 (group_id,)
             )
 
             return [
-                str(member[0])
+                {
+                    "id": str(member[0]),
+                    "name": member[1],
+                    "email": member[2]
+                }
                 for member in cursor.fetchall()
             ]
 
