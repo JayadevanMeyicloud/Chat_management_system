@@ -5,10 +5,7 @@ from app.services.groups.repository.group_repository import (
     get_group_by_id,
     is_group_admin,
     delete_group,
-    update_group_settings
-)
-
-from app.services.groups.repository.group_repository import (
+    update_group_settings,
     get_user_role
 )
 

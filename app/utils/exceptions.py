@@ -160,3 +160,16 @@ class GroupAccessDeniedError(Exception):
 
     def __init__(self):
         super().__init__("Access denied")
+        
+class GroupMemberAlreadyExistsError(Exception):
+    status_code = 409
+
+    def __init__(self):
+        super().__init__("User is already a member of this group")
+        
+
+class GroupMemberNotFoundError(Exception):
+    status_code = 404
+
+    def __init__(self):
+        super().__init__("Group member not found")

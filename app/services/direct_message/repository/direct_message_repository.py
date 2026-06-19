@@ -199,3 +199,86 @@ def create_delivery_record(
 
     finally:
         connection.close()
+        
+def get_user_by_cognito_sub(cognito_sub):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                SELECT *
+                FROM users
+                WHERE cognito_sub = %s
+                """,
+                (cognito_sub,)
+            )
+
+            return cursor.fetchone()
+
+    finally:
+        connection.close()
+        
+
+def is_chat_participant(chat_id, user_id):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                SELECT id
+                FROM direct_chats
+                WHERE id = %s
+                AND (
+                    user1_id = %s
+                    OR user2_id = %s
+                )
+                """,
+                (
+                    chat_id,
+                    user_id,
+                    user_id
+                )
+            )
+
+            return cursor.fetchone()
+
+    finally:
+        connection.close()
+
+#direct_message_delivery
+
+def get_chat_receiver(
+    chat_id,
+    sender_id
+):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                SELECT
+                    CASE
+                        WHEN user1_id = %s THEN user2_id
+                        ELSE user1_id
+                    END AS receiver_id
+                FROM direct_chats
+                WHERE id = %s
+                """,
+                (
+                    sender_id,
+                    chat_id
+                )
+            )
+
+            receiver = cursor.fetchone()
+
+            return str(receiver[0])
+
+    finally:
+        connection.close()      

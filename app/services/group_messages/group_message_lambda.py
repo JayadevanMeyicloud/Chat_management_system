@@ -4,7 +4,7 @@ from app.services.users.repository.user_repository import (
     get_user_by_cognito_sub
 )
 
-from app.services.groupMessage_service import (
+from app.services.group_messages.service.groupMessage_service import (
     send_message,
     fetch_messages,
     get_message,

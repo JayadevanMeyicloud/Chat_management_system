@@ -234,3 +234,5 @@ layers/common/psycopg/python/
 # Python cache
 __pycache__/
 *.pyc
+# Learning Notes
+CloudFormation_Learnings/

@@ -15,13 +15,19 @@ Parameters:
     Type: String
     NoEcho: true
 
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 30
+    MemorySize: 512
+
 Resources:
 
   PsycopgLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: !Sub "psycopg-layer-${Stage}"
-      ContentUri: ../layers/common/psycopg
+      ContentUri: ../layers/common
       CompatibleRuntimes:
         - python3.12
       RetentionPolicy: Retain
@@ -30,10 +36,13 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: !Sub "chat-management-userpool-${Stage}"
+
       UsernameAttributes:
         - email
+
       AutoVerifiedAttributes:
         - email
+
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -47,7 +56,9 @@ Resources:
     Properties:
       ClientName: !Sub "chat-management-client-${Stage}"
       UserPoolId: !Ref CognitoUserPool
+
       GenerateSecret: false
+
       ExplicitAuthFlows:
         - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
@@ -58,8 +69,10 @@ Resources:
       Name: !Sub "chat-management-api-${Stage}"
       StageName: !Ref Stage
       OpenApiVersion: 3.0.1
+
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
+
         Authorizers:
           CognitoAuthorizer:
             UserPoolArn: !GetAtt CognitoUserPool.Arn
@@ -68,11 +81,10 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub "chat-auth-lambda-${Stage}"
-      Runtime: python3.12
-      Timeout: 30
-      MemorySize: 512
-      CodeUri: ../
-      Handler: app.services.users.service.cognito_lambda_handler.lambda_handler
+
+      CodeUri: ../app
+
+      Handler: services.users.cognito_lambda_handler.lambda_handler
 
       Layers:
         - !Ref PsycopgLayer
@@ -87,6 +99,7 @@ Resources:
 
       Policies:
         - AWSLambdaBasicExecutionRole
+
         - Statement:
             - Effect: Allow
               Action:
@@ -98,6 +111,7 @@ Resources:
               Resource: !GetAtt CognitoUserPool.Arn
 
       Events:
+
         Login:
           Type: Api
           Properties:
@@ -133,11 +147,15 @@ Resources:
               Authorizer: NONE
 
 Outputs:
+
   ApiUrl:
+    Description: API Gateway URL
     Value: !Sub "https://${ChatApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
 
   UserPoolId:
+    Description: Cognito User Pool ID
     Value: !Ref CognitoUserPool
 
   UserPoolClientId:
+    Description: Cognito App Client ID
     Value: !Ref CognitoUserPoolClient

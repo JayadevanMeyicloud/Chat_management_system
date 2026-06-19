@@ -1,6 +1,6 @@
 import json
 
-from app.services.users.repository.user_repository import get_user_by_cognito_sub
+from app.services.groups.repository.group_repository import get_user_by_cognito_sub
 
 from app.services.groups.service.group_service import (
     create_new_group,

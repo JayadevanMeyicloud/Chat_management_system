@@ -1,4 +1,4 @@
-from app.services.direct_chat.repository.direct_chat_repository import (
+from app.services.direct_message.repository.direct_message_repository import (
     is_chat_participant,
     get_chat_receiver
 )

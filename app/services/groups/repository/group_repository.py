@@ -21,7 +21,25 @@ from core.database import get_connection
 
 #     finally:
 #         connection.close()
+def get_user_by_cognito_sub(cognito_sub):
+    connection = get_connection()
 
+    try:
+        with connection.cursor() as cursor:
+
+            cursor.execute(
+                """
+                SELECT *
+                FROM users
+                WHERE cognito_sub = %s
+                """,
+                (cognito_sub,)
+            )
+
+            return cursor.fetchone()
+
+    finally:
+        connection.close()
 
 def get_group_by_name(name):
     connection = get_connection()

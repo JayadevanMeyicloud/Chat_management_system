@@ -1,11 +1,11 @@
 
 import json
 
-from app.services.users.repository.user_repository import get_user_by_cognito_sub
-from app.services.direct_chat.service.direct_chat_service import (
-    create_chat,
-    fetch_direct_chats
-)
+from app.services.direct_message.repository.direct_message_repository import get_user_by_cognito_sub
+# from app.services.direct_chat.service.direct_chat_service import (
+#     create_chat,
+#     fetch_direct_chats
+# )
 
 from app.services.direct_message.service.direct_message_service import (
     send_message,
@@ -55,43 +55,43 @@ def lambda_handler(event, context):
         chat_id = path_parameters.get("chat_id")
         message_id = path_parameters.get("message_id")
 
-        # CREATE DIRECT CHAT
-        if path == "/api/v1/direct-chats" and method == "POST":
+        # # CREATE DIRECT CHAT
+        # if path == "/api/v1/direct-chats" and method == "POST":
 
-            logger.info({
-                "receiver_id": body.get("receiver_id")
-            })
+        #     logger.info({
+        #         "receiver_id": body.get("receiver_id")
+        #     })
 
-            response = create_chat(
-                current_user_id,
-                body["receiver_id"]
-            )
+        #     response = create_chat(
+        #         current_user_id,
+        #         body["receiver_id"]
+        #     )
 
-            logger.info({
-                "event": "direct_chat_created",
-                "user_id": current_user_id
-            })
+        #     logger.info({
+        #         "event": "direct_chat_created",
+        #         "user_id": current_user_id
+        #     })
 
-            return create_response(
-                201,
-                "Direct chat ready",
-                {
-                    "chat": response
-                }
-            )
+        #     return create_response(
+        #         201,
+        #         "Direct chat ready",
+        #         {
+        #             "chat": response
+        #         }
+        #     )
 
-        # GET DIRECT CHATS
-        if path == "/api/v1/direct-chats" and method == "GET":
+        # # GET DIRECT CHATS
+        # if path == "/api/v1/direct-chats" and method == "GET":
 
-            response = fetch_direct_chats(current_user_id)
+        #     response = fetch_direct_chats(current_user_id)
 
-            return create_response(
-                200,
-                "Direct chats fetched successfully",
-                {
-                    "chats": response
-                }
-            )
+        #     return create_response(
+        #         200,
+        #         "Direct chats fetched successfully",
+        #         {
+        #             "chats": response
+        #         }
+        #     )
 
         # SEND DIRECT MESSAGE
         if (

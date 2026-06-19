@@ -1,8 +1,8 @@
 import json
 
-from app.services.users.repository.user_repository import get_user_by_cognito_sub
+from app.services.message_delivery_status.repository.message_delivery_repository import get_user_by_cognito_sub
 
-from app.services.message_delivery_service import (
+from app.services.message_delivery_status.service.message_delivery_service import (
     update_delivery,
     fetch_delivery_report
 )

@@ -1,11 +1,11 @@
-from app.repository.message_delivery_repository import get_message_type
+from app.services.message_delivery_status.repository.message_delivery_repository import get_message_type
 
-from app.repository.group_delivery_repository import (
+from app.services.message_delivery_status.repository.group_delivery_repository import (
     update_group_delivery_status,
     get_group_delivery_report
 )
 
-from app.repository.direct_delivery_repository import (
+from app.services.message_delivery_status.repository.direct_delivery_repository import (
     update_direct_delivery_status,
     get_direct_delivery_report
 )
