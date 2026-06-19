@@ -1,4 +1,4 @@
-from app.core.database import get_connection
+from core.database import get_connection
 
 
 def update_group_delivery_status(

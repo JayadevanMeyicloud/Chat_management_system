@@ -4,18 +4,18 @@ import json
 #     get_user_by_cognito_sub
 # )
 
-from app.services.direct_chat.repository.direct_chat_repository import (
+from repository.direct_chat_repository import (
     get_user_by_cognito_sub
 )
-from app.services.direct_chat.service.direct_chat_service import (
+from service.direct_chat_service import (
     create_chat,
     fetch_direct_chats
 )
 
-from app.utils.response_handler import create_response
-from app.utils.logger import get_logger
+from utils.response_handler import create_response
+from utils.logger import get_logger
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     DirectChatAlreadyExistsError,
     SelfChatNotAllowedError,
     ChatAccessDeniedError

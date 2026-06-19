@@ -1,24 +1,24 @@
 import json
 
-from app.services.group_member.repository.groupMember_repository import (
+from repository.groupMember_repository import (
     get_user_by_cognito_sub
 )
 
-from app.services.group_member.service.groupMember_service import (
+from service.groupMember_service import (
     add_member,
     fetch_members,
     remove_member
 )
 
-from app.utils.response_handler import (
+from utils.response_handler import (
     create_response
 )
 
-from app.utils.logger import (
+from utils.logger import (
     get_logger
 )
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     GroupNotFoundError,
     GroupAccessDeniedError,
     UserNotFoundError,

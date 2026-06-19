@@ -1,20 +1,20 @@
 import json
 
-from app.services.users.repository.user_repository import (
+from repository.groupMessage_repository import (
     get_user_by_cognito_sub
 )
 
-from app.services.group_messages.service.groupMessage_service import (
+from service.groupMessage_service import (
     send_message,
     fetch_messages,
     get_message,
     delete_message_service
 )
 
-from app.utils.response_handler import create_response
-from app.utils.logger import get_logger
+from utils.response_handler import create_response
+from utils.logger import get_logger
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     GroupNotFoundError,
     GroupMembershipRequiredError,
     GroupMessageNotFoundError,

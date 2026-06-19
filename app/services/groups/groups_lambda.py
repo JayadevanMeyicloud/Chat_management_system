@@ -1,8 +1,8 @@
 import json
 
-from app.services.groups.repository.group_repository import get_user_by_cognito_sub
+from repository.group_repository import get_user_by_cognito_sub
 
-from app.services.groups.service.group_service import (
+from service.group_service import (
     create_new_group,
     fetch_groups,
     fetch_group,
@@ -10,10 +10,10 @@ from app.services.groups.service.group_service import (
     change_group_settings
 )
 
-from app.utils.response_handler import create_response
-from app.utils.logger import get_logger
+from utils.response_handler import create_response
+from utils.logger import get_logger
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     AdminOnlyActionError,
     GroupAlreadyExistsError,
     GroupNotFoundError,

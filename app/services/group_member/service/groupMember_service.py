@@ -1,4 +1,4 @@
-from app.services.group_member.repository.groupMember_repository import (
+from repository.groupMember_repository import (
     get_group_by_id,
     is_group_admin,
     is_member_exists,
@@ -9,7 +9,7 @@ from app.services.group_member.repository.groupMember_repository import (
 )
 
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     GroupNotFoundError,
     GroupAccessDeniedError,
     UserNotFoundError,

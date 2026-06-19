@@ -1,16 +1,16 @@
-from app.services.message_delivery_status.repository.message_delivery_repository import get_message_type
+from repository.message_delivery_repository import get_message_type
 
-from app.services.message_delivery_status.repository.group_delivery_repository import (
+from repository.group_delivery_repository import (
     update_group_delivery_status,
     get_group_delivery_report
 )
 
-from app.services.message_delivery_status.repository.direct_delivery_repository import (
+from repository.direct_delivery_repository import (
     update_direct_delivery_status,
     get_direct_delivery_report
 )
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     MessageNotFoundError,
     InvalidDeliveryStatusError,
     DeliveryAccessDeniedError,

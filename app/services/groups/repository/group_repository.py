@@ -1,4 +1,4 @@
-from app.core.database import get_connection
+from core.database import get_connection
 
 
 # def get_group_by_id(group_id):

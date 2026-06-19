@@ -1,9 +1,9 @@
-from app.services.direct_message.repository.direct_message_repository import (
+from repository.direct_message_repository import (
     is_chat_participant,
     get_chat_receiver
 )
 
-from app.services.direct_message.repository.direct_message_repository import (
+from repository.direct_message_repository import (
     check_duplicate_message,
     create_direct_message,
     get_direct_messages,
@@ -12,7 +12,7 @@ from app.services.direct_message.repository.direct_message_repository import (
     create_delivery_record
 )
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     ChatAccessDeniedError,
     DuplicateMessageError,
     MessageNotFoundError,

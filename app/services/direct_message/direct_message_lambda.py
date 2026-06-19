@@ -1,22 +1,22 @@
 
 import json
 
-from app.services.direct_message.repository.direct_message_repository import get_user_by_cognito_sub
+from repository.direct_message_repository import get_user_by_cognito_sub
 # from app.services.direct_chat.service.direct_chat_service import (
 #     create_chat,
 #     fetch_direct_chats
 # )
 
-from app.services.direct_message.service.direct_message_service import (
+from service.direct_message_service import (
     send_message,
     fetch_message,
     remove_message
 )
 
-from app.utils.response_handler import create_response
+from utils.response_handler import create_response
 from app.utils.logger import get_logger
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     DirectChatAlreadyExistsError,
     SelfChatNotAllowedError,
     ChatAccessDeniedError,

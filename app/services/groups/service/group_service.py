@@ -1,4 +1,4 @@
-from app.services.groups.repository.group_repository import (
+from repository.group_repository import (
     get_group_by_name,
     create_group,
     get_groups,
@@ -9,7 +9,7 @@ from app.services.groups.repository.group_repository import (
     get_user_role
 )
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     AdminOnlyActionError,
     GroupAlreadyExistsError,
     GroupNotFoundError,

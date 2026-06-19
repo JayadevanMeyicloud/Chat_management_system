@@ -18,8 +18,13 @@ Parameters:
 Globals:
   Function:
     Runtime: python3.12
-    Timeout: 30
+    #Timeout: 30
     MemorySize: 512
+    Environment:
+      Variables:
+        STAGE: !Ref Stage
+        DATABASE_URL: !Ref DatabaseUrl
+        SECRET_KEY: !Ref SecretKey
 
 Resources:
 
@@ -85,15 +90,13 @@ Resources:
       CodeUri: ../app/services/users
 
       Handler: cognito_lambda_handler.lambda_handler
+      Timeout: 10
 
       Layers:
         - !Ref PsycopgLayer
 
       Environment:
         Variables:
-          STAGE: !Ref Stage
-          DATABASE_URL: !Ref DatabaseUrl
-          SECRET_KEY: !Ref SecretKey
           USER_POOL_ID: !Ref CognitoUserPool
           CLIENT_ID: !Ref CognitoUserPoolClient
 
@@ -145,6 +148,209 @@ Resources:
             RestApiId: !Ref ChatApi
             Auth:
               Authorizer: NONE
+
+  DirectChatFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "chat-direct-chat-lambda-${Stage}"
+      CodeUri: ../app/services/direct_chat
+      Handler: direct_chat_lambda.lambda_handler
+      Timeout: 15
+      Layers:
+        - !Ref PsycopgLayer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        ListDirectChat:
+          Type: Api
+          Properties:
+            Path: /api/v1/direct-chats
+            Method: get
+            RestApiId: !Ref ChatApi
+
+        CreateDirectChat:
+          Type: Api
+          Properties:
+            Path: /api/v1/direct-chats
+            Method: post
+            RestApiId: !Ref ChatApi
+
+  DirectMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "chat-direct-message-lambda-${Stage}"
+      CodeUri: ../app/services/direct_message
+      Handler: direct_message_lambda.lambda_handler
+      Timeout: 15
+      Layers:
+        - !Ref PsycopgLayer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+      Events:
+        ListMessage:
+          Type: Api
+          Properties:
+            Path: /api/v1/direct-chats/{chat_id}/messages
+            Method: get
+            RestApiId: !Ref ChatApi
+
+        CreateMessage:
+          Type: Api
+          Properties:
+            Path: /api/v1/direct-chats/{chat_id}/messages
+            Method: post
+            RestApiId: !Ref ChatApi
+
+        DeleteMessage:
+          Type: Api
+          Properties:
+            Path: /api/v1/direct-chats/{chat_id}/messages/{message_id}
+            Method: delete
+            RestApiId: !Ref ChatApi
+  
+  GroupsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "chat-groups-lambda-${Stage}"
+      CodeUri: ../app/services/groups
+      Handler: groups_lambda.lambda_handler
+      Timeout: 15
+      Layers:
+        - !Ref PsycopgLayer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+      Events:
+        ListGroups:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups
+            Method: get
+            RestApiId: !Ref ChatApi
+
+        CreateGroup:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups
+            Method: post
+            RestApiId: !Ref ChatApi
+
+        GetGroup:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups/{group_id}
+            Method: get
+            RestApiId: !Ref ChatApi
+
+        DeleteGroup:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups/{group_id}
+            Method: delete
+            RestApiId: !Ref ChatApi
+
+        UpdateGroupSettings:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups/{group_id}/settings
+            Method: patch
+            RestApiId: !Ref ChatApi
+
+  GroupMembersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "chat-group-members-lambda-${Stage}"
+      CodeUri: ../app/services/group_member
+      Handler: groupMember_lambda.lambda_handler
+      Timeout: 15
+      Layers:
+        - !Ref PsycopgLayer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+      Events:
+        ListMembers:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups/{group_id}/members
+            Method: get
+            RestApiId: !Ref ChatApi
+
+        AddMember:
+            Type: Api
+            Properties:
+              Path: /api/v1/groups/{group_id}/members
+              Method: post
+              RestApiId: !Ref ChatApi
+
+        RemoveMember:
+            Type: Api
+            Properties:
+              Path: /api/v1/groups/{group_id}/members/{user_id}
+              Method: delete
+              RestApiId: !Ref ChatApi
+
+  GroupMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "chat-group-message-lambda-${Stage}"
+      CodeUri: ../app/services/group_messages
+      Handler: group_message_lambda.lambda_handler
+      Timeout: 15
+      Layers:
+        - !Ref PsycopgLayer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+      Events:
+        ListGroupMessages:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups/{group_id}/messages
+            Method: get
+            RestApiId: !Ref ChatApi
+
+        CreateGroupMessage:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups/{group_id}/messages
+            Method: post
+            RestApiId: !Ref ChatApi
+
+        DeleteGroupMessage:
+          Type: Api
+          Properties:
+            Path: /api/v1/groups/{group_id}/messages/{message_id}
+            Method: delete
+            RestApiId: !Ref ChatApi
+
+  MessageDeliveryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "chat-message-delivery-lambda-${Stage}"
+      CodeUri: ../app/services/message_delivery_status
+      Handler: message_delivery_lambda.lambda_handler
+      Timeout: 15
+      Layers:
+        - !Ref PsycopgLayer
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
+      Events:
+        UpdateDeliveryStatus:
+          Type: Api
+          Properties:
+            Path: /api/v1/message/delivery/{message_id}
+            Method: patch
+            RestApiId: !Ref ChatApi
+
+        GetDeliveryReport:
+          Type: Api
+          Properties:
+            Path: /api/v1/message/delivery/{message_id}/report
+            Method: get
+            RestApiId: !Ref ChatApi
 
 Outputs:
 

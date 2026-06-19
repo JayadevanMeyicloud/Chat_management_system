@@ -1,16 +1,16 @@
 import json
 
-from app.services.message_delivery_status.repository.message_delivery_repository import get_user_by_cognito_sub
+from repository.message_delivery_repository import get_user_by_cognito_sub
 
-from app.services.message_delivery_status.service.message_delivery_service import (
+from service.message_delivery_service import (
     update_delivery,
     fetch_delivery_report
 )
 
-from app.utils.response_handler import create_response
-from app.utils.logger import get_logger
+from utils.response_handler import create_response
+from utils.logger import get_logger
 
-from layers.common.psycopg.python.utils.exceptions import (
+from utils.exceptions import (
     MessageNotFoundError,
     InvalidDeliveryStatusError,
     DeliveryAccessDeniedError,
