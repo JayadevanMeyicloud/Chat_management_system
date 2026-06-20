@@ -7,18 +7,13 @@ from service.group_service import (
     fetch_groups,
     fetch_group,
     remove_group,
-    change_group_settings
+    change_group_settings,
 )
 
 from utils.response_handler import create_response
 from utils.logger import get_logger
+from utils.exceptions import AppError
 
-from utils.exceptions import (
-    AdminOnlyActionError,
-    GroupAlreadyExistsError,
-    GroupNotFoundError,
-    GroupAccessDeniedError
-)
 
 logger = get_logger(__name__)
 
@@ -29,11 +24,7 @@ def lambda_handler(event, context):
         path = event.get("path")
         method = event.get("httpMethod")
 
-        logger.info({
-            "event": "request_received",
-            "method": method,
-            "path": path
-        })
+        logger.info({"event": "request_received", "method": method, "path": path})
 
         claims = event["requestContext"]["authorizer"]["claims"]
         cognito_sub = claims["sub"]
@@ -52,141 +43,80 @@ def lambda_handler(event, context):
 
         # CREATE GROUP
         if path == "/api/v1/groups" and method == "POST":
-
             response = create_new_group(
-                current_user_id,
-                body["name"],
-                body.get("description")
+                current_user_id, body["name"], body.get("description")
             )
 
-            logger.info({
-                "event": "group_created",
-                "group_name": body["name"],
-                "created_by": current_user_id
-            })
+            logger.info(
+                {
+                    "event": "group_created",
+                    "group_name": body["name"],
+                    "created_by": current_user_id,
+                }
+            )
 
             return create_response(
-                201,
-                "Group created successfully",
-                {
-                    "group": response
-                }
+                201, "Group created successfully", {"group": response}
             )
 
         # GET ALL GROUPS
         if path == "/api/v1/groups" and method == "GET":
-
             response = fetch_groups()
 
             return create_response(
-                200,
-                "Groups fetched successfully",
-                {
-                    "groups": response
-                }
+                200, "Groups fetched successfully", {"groups": response}
             )
 
         # GET GROUP BY ID
-        if (
-            path == f"/api/v1/groups/{group_id}"
-            and method == "GET"
-        ):
-
+        if path == f"/api/v1/groups/{group_id}" and method == "GET":
             response = fetch_group(group_id)
 
             return create_response(
-                200,
-                "Group fetched successfully",
-                {
-                    "group": response
-                }
+                200, "Group fetched successfully", {"group": response}
             )
 
         # DELETE GROUP (Admin Only)
-        if (
-            path == f"/api/v1/groups/{group_id}"
-            and method == "DELETE"
-        ):
+        if path == f"/api/v1/groups/{group_id}" and method == "DELETE":
+            remove_group(group_id, current_user_id)
 
-            remove_group(
-                group_id,
-                current_user_id
-            )
-
-            logger.info({
-                "event": "group_deleted",
-                "group_id": group_id,
-                "deleted_by": current_user_id
-            })
-
-            return create_response(
-                200,
-                "Group deleted successfully"
-            )
-
-        # UPDATE GROUP SETTINGS (Admin Only)
-        if (
-            path == f"/api/v1/groups/{group_id}/settings"
-            and method == "PATCH"
-        ):
-
-            response = change_group_settings(
-                group_id,
-                current_user_id,
-                body["name"],
-                body.get("description")
-            )
-
-            logger.info({
-                "event": "group_settings_updated",
-                "group_id": group_id,
-                "updated_by": current_user_id
-            })
-
-            return create_response(
-                200,
-                "Group settings updated successfully",
+            logger.info(
                 {
-                    "group": response
+                    "event": "group_deleted",
+                    "group_id": group_id,
+                    "deleted_by": current_user_id,
                 }
             )
 
-        logger.warning({
-            "event": "route_not_found",
-            "method": method,
-            "path": path
-        })
+            return create_response(200, "Group deleted successfully")
 
-        return create_response(
-            404,
-            "Route not found"
-        )
+        # UPDATE GROUP SETTINGS (Admin Only)
+        if path == f"/api/v1/groups/{group_id}/settings" and method == "PATCH":
+            response = change_group_settings(
+                group_id, current_user_id, body["name"], body.get("description")
+            )
 
-    except (
-        AdminOnlyActionError,
-        GroupAlreadyExistsError,
-        GroupNotFoundError,
-        GroupAccessDeniedError
-    ) as e:
+            logger.info(
+                {
+                    "event": "group_settings_updated",
+                    "group_id": group_id,
+                    "updated_by": current_user_id,
+                }
+            )
 
-        logger.error({
-            "event": "request_failed",
-            "error": str(e)
-        })
+            return create_response(
+                200, "Group settings updated successfully", {"group": response}
+            )
 
-        return create_response(
-            e.status_code,
-            str(e)
-        )
+        logger.warning({"event": "route_not_found", "method": method, "path": path})
+
+        return create_response(404, "Route not found")
+
+    except AppError as e:
+        logger.error({"event": "request_failed", "error": str(e)})
+
+        return create_response(e.status_code, str(e))
 
     except Exception as e:
+        logger.exception({"event": "internal_error", "error": str(e)})
 
-        logger.exception({
-            "event": "internal_error",
-            "error": str(e)
-        })
-
-        return create_response(
-            500,
-            "Internal server error"
-        )
+        return create_response(500, "Internal server error")

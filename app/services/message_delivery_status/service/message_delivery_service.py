@@ -9,14 +9,11 @@ from repository.direct_delivery_repository import (
     update_direct_delivery_status,
     get_direct_delivery_report
 )
-
-from utils.exceptions import (
-    MessageNotFoundError,
-    InvalidDeliveryStatusError,
-    DeliveryAccessDeniedError,
-    DeliveryRecordNotFoundError
+from utils.exceptions import(
+    InvalidRequestError,
+    ForbiddenError,
+    NotFoundError,
 )
-
 
 VALID_STATUSES = [
     "pending",
@@ -25,38 +22,26 @@ VALID_STATUSES = [
 ]
 
 
-def update_delivery(
-    message_id,
-    user_id,
-    status
-):
+def update_delivery( message_id,user_id,status):
 
     if status not in VALID_STATUSES:
-        raise InvalidDeliveryStatusError()
+        raise InvalidRequestError("Invalid delivery status")
 
     message = get_message_type(message_id)
 
     if not message:
-        raise MessageNotFoundError()
-
+        raise NotFoundError("Message not found")
+    
     if message["type"] == "group":
 
-        delivery = update_group_delivery_status(
-            message_id,
-            user_id,
-            status
-        )
-
+        delivery = update_group_delivery_status(message_id,user_id,status)
+        
     else:
 
-        delivery = update_direct_delivery_status(
-            message_id,
-            user_id,
-            status
-        )
+        delivery = update_direct_delivery_status(message_id,user_id,status)
 
     if not delivery:
-        raise DeliveryRecordNotFoundError()
+        raise NotFoundError("Delivery record not found")
 
     return {
         "message_id": str(delivery[0]),
@@ -65,22 +50,18 @@ def update_delivery(
     }
 
 
-def fetch_delivery_report(
-    message_id,
-    current_user_id,
-    current_user_role
-):
+def fetch_delivery_report( message_id,current_user_id,current_user_role ):
 
     message = get_message_type(message_id)
 
     if not message:
-        raise MessageNotFoundError()
+        raise NotFoundError("Message not found")
 
     if (
         current_user_role != "admin"
         and message["sender_id"] != current_user_id
     ):
-        raise DeliveryAccessDeniedError()
+        raise ForbiddenError("Delivery Access Denied")
 
     if message["type"] == "group":
         report_rows = get_group_delivery_report(message_id)

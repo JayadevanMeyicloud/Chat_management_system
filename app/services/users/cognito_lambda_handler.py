@@ -1,37 +1,10 @@
 import json
-
-# from app.services.users.service.cognito_service import register_user, verify_otp, login_user
-# from layers.common.psycopg.python.utils.response_handler import create_response
-# from layers.common.psycopg.python.utils.logger import get_logger
-# from layers.common.psycopg.python.utils.exceptions import (
-#     UserAlreadyExistsError,
-#     InvalidPasswordError,
-#     InvalidRequestError,
-#     InvalidCredentialsError,
-#     UserNotFoundError
-# )
-# from app.services.users.service.user_service import fetch_user
-
-from service.cognito_service import (
-    register_user,
-    verify_otp,
-    login_user
-)
-
-from service.user_service import (
-    fetch_user
-)
-
+from service.cognito_service import register_user, verify_otp, login_user
+from service.user_service import fetch_user
 from utils.response_handler import create_response
+from utils.exceptions import AppError
 from utils.logger import get_logger
 
-from utils.exceptions import (
-    UserAlreadyExistsError,
-    InvalidPasswordError,
-    InvalidRequestError,
-    InvalidCredentialsError,
-    UserNotFoundError
-)
 
 logger = get_logger(__name__)
 
@@ -47,41 +20,29 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event.get("body") or "{}")
 
-        # REGISTER 
+        # REGISTER
         if path == "/api/v1/auth/users" and method == "POST":
-            register_user(
-                body.get("name"),
-                body.get("email"),
-                body.get("password"))
+            register_user(body.get("name"), body.get("email"), body.get("password"))
 
             logger.info({"event": "register_success", "email": body.get("email")})
 
             return create_response(201, "User registered successfully")
 
-        #GET users
+        # GET users
         if path == f"/api/v1/auth/users/{user_id}" and method == "GET":
-
             response = fetch_user(user_id)
 
-            return create_response(
-                200,
-                "User fetched successfully",
-                {
-                    "user": response
-                }
-            )
+            return create_response(200, "User fetched successfully", {"user": response})
 
-        # VERIFY 
+        # VERIFY
         if path == "/api/v1/auth/verify" and method == "POST":
-            verify_otp(
-                body.get("email"), 
-                body.get("otp"))
+            verify_otp(body.get("email"), body.get("otp"))
 
             logger.info({"event": "verify_success", "email": body.get("email")})
 
             return create_response(200, "Email verified successfully")
 
-        # LOGIN 
+        # LOGIN
         if path == "/api/v1/auth/login" and method == "POST":
             response = login_user(body.get("email"), body.get("password"))
             auth = response["AuthenticationResult"]
@@ -94,35 +55,20 @@ def lambda_handler(event, context):
                 {
                     "access_token": auth["AccessToken"],
                     "refresh_token": auth["RefreshToken"],
-                    "id_token": auth["IdToken"]
-                }
+                    "id_token": auth["IdToken"],
+                },
             )
 
         logger.warning({"event": "route_not_found", "path": path, "method": method})
 
         return create_response(404, "Route not found")
 
-    except UserAlreadyExistsError as e:
-        logger.error({"event": "register_failed", "error": str(e)})
-        return create_response(409, str(e))
-
-    except InvalidPasswordError as e:
-        logger.error({"event": "register_failed", "error": str(e)})
-        return create_response(400, str(e))
-
-    except InvalidCredentialsError as e:
-        logger.error({"event": "login_failed", "error": str(e)})
-        return create_response(401, str(e))
-
-    except InvalidRequestError as e:
+    except AppError as e:
         logger.error({"event": "request_failed", "error": str(e)})
-        return create_response(400, str(e))
 
-    except UserNotFoundError as e:
-        logger.error({"event": "request_failed", "error": str(e)})
-        return create_response(404, str(e))
+        return create_response(e.status_code, str(e))
 
     except Exception as e:
         logger.exception({"event": "internal_error", "error": str(e)})
+
         return create_response(500, "Internal server error")
-    

@@ -1,30 +1,18 @@
-
 import boto3
 
-# from layers.common.psycopg.python.core.config import CLIENT_ID
-# from app.services.users.repository.user_repository import create_user
-
-# from layers.common.psycopg.python.utils.exceptions import (
-#     UserAlreadyExistsError,
-#     InvalidCredentialsError,
-#     InvalidPasswordError,
-#     InvalidRequestError
-# )
 from core.config import CLIENT_ID
-
 from repository.user_repository import create_user
 
 from utils.exceptions import (
-    UserAlreadyExistsError,
-    InvalidCredentialsError,
-    InvalidPasswordError,
-    InvalidRequestError
+    ConflictError,
+    InvalidRequestError,
+    UnAuthorizedError
 )
 
 client = boto3.client("cognito-idp")
 
 
-# ---------------- REGISTER ----------------
+# REGISTER
 def register_user(name, email, password):
     try:
         response = client.sign_up(
@@ -32,38 +20,24 @@ def register_user(name, email, password):
             Username=email,
             Password=password,
             UserAttributes=[
-                {
-                    "Name": "name",
-                    "Value": name
-                },
-                {
-                    "Name": "email",
-                    "Value": email
-                }
+                {"Name": "name", "Value": name},
+                {"Name": "email", "Value": email}
             ]
         )
 
-        cognito_sub = response["UserSub"]
-
-        create_user(
-            cognito_sub,
-            name,
-            email
-        )
-
+        create_user(response["UserSub"],name,email)
         return response
 
     except client.exceptions.UsernameExistsException:
-        raise UserAlreadyExistsError()
+        raise ConflictError("User already exists")
 
     except client.exceptions.InvalidPasswordException:
-        raise InvalidPasswordError()
-
-    except Exception as e:
-        raise InvalidRequestError(str(e))
-
-
-# ---------------- VERIFY ----------------
+        raise InvalidRequestError(
+            "Password must contain uppercase, lowercase, "
+            "number, special character and minimum 8 characters"
+        )
+        
+# VERIFY OTP
 def verify_otp(email, otp):
     try:
         return client.confirm_sign_up(
@@ -78,11 +52,7 @@ def verify_otp(email, otp):
     except client.exceptions.ExpiredCodeException:
         raise InvalidRequestError("OTP expired")
 
-    except Exception as e:
-        raise InvalidRequestError(str(e))
-
-
-# ---------------- LOGIN ----------------
+# LOGIN
 def login_user(email, password):
     try:
         return client.initiate_auth(
@@ -95,10 +65,7 @@ def login_user(email, password):
         )
 
     except client.exceptions.NotAuthorizedException:
-        raise InvalidCredentialsError("Invalid Credentials")
+        raise UnAuthorizedError("Invalid credentials")
 
     except client.exceptions.UserNotConfirmedException:
         raise InvalidRequestError("Email not verified")
-
-    except Exception as e:
-        raise InvalidRequestError(str(e))

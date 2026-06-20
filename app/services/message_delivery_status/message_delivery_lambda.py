@@ -2,20 +2,11 @@ import json
 
 from repository.message_delivery_repository import get_user_by_cognito_sub
 
-from service.message_delivery_service import (
-    update_delivery,
-    fetch_delivery_report
-)
+from service.message_delivery_service import update_delivery, fetch_delivery_report
 
 from utils.response_handler import create_response
 from utils.logger import get_logger
-
-from utils.exceptions import (
-    MessageNotFoundError,
-    InvalidDeliveryStatusError,
-    DeliveryAccessDeniedError,
-    DeliveryRecordNotFoundError
-)
+from utils.exceptions import AppError
 
 logger = get_logger(__name__)
 
@@ -26,11 +17,7 @@ def lambda_handler(event, context):
         path = event.get("path")
         method = event.get("httpMethod")
 
-        logger.info({
-            "event": "request_received",
-            "method": method,
-            "path": path
-        })
+        logger.info({"event": "request_received", "method": method, "path": path})
 
         claims = event["requestContext"]["authorizer"]["claims"]
         cognito_sub = claims["sub"]
@@ -46,97 +33,52 @@ def lambda_handler(event, context):
             body = json.loads(body)
 
         path_parameters = event.get("pathParameters") or {}
-
         message_id = path_parameters.get("message_id")
 
         # UPDATE DELIVERY STATUS
-        if (
-            path == f"/api/v1/message/delivery/{message_id}"
-            and method == "PATCH"
-        ):
+        if path == f"/api/v1/message/delivery/{message_id}" and method == "PATCH":
+            response = update_delivery(message_id, current_user_id, body["status"])
 
-            response = update_delivery(
-                message_id,
-                current_user_id,
-                body["status"]
+            logger.info(
+                {
+                    "event": "delivery_updated",
+                    "message_id": message_id,
+                    "user_id": current_user_id,
+                }
             )
 
-            logger.info({
-                "event": "delivery_updated",
-                "message_id": message_id,
-                "user_id": current_user_id
-            })
-
             return create_response(
-                200,
-                "Delivery status updated successfully",
-                {
-                    "delivery": response
-                }
+                200, "Delivery status updated successfully", {"delivery": response}
             )
 
         # GET DELIVERY REPORT
-        if (
-            path == f"/api/v1/message/delivery/{message_id}/report"
-            and method == "GET"
-        ):
-
+        if path == f"/api/v1/message/delivery/{message_id}/report" and method == "GET":
             response = fetch_delivery_report(
-                message_id,
-                current_user_id,
-                current_user_role
+                message_id, current_user_id, current_user_role
             )
 
-            logger.info({
-                "event": "delivery_report_fetched",
-                "message_id": message_id,
-                "user_id": current_user_id
-            })
-
-            return create_response(
-                200,
-                "Delivery report fetched successfully",
+            logger.info(
                 {
-                    "report": response
+                    "event": "delivery_report_fetched",
+                    "message_id": message_id,
+                    "user_id": current_user_id,
                 }
             )
 
-        logger.warning({
-            "event": "route_not_found",
-            "method": method,
-            "path": path
-        })
+            return create_response(
+                200, "Delivery report fetched successfully", {"report": response}
+            )
 
-        return create_response(
-            404,
-            "Route not found"
-        )
+        logger.warning({"event": "route_not_found", "method": method, "path": path})
 
-    except (
-        MessageNotFoundError,
-        InvalidDeliveryStatusError,
-        DeliveryAccessDeniedError,
-        DeliveryRecordNotFoundError
-    ) as e:
+        return create_response(404, "Route not found")
 
-        logger.error({
-            "event": "request_failed",
-            "error": str(e)
-        })
+    except AppError as e:
+        logger.error({"event": "request_failed", "error": str(e)})
 
-        return create_response(
-            e.status_code,
-            str(e)
-        )
+        return create_response(e.status_code, str(e))
 
     except Exception as e:
+        logger.exception({"event": "internal_error", "error": str(e)})
 
-        logger.exception({
-            "event": "internal_error",
-            "error": str(e)
-        })
-
-        return create_response(
-            500,
-            "Internal server error"
-        )
+        return create_response(500, "Internal server error")

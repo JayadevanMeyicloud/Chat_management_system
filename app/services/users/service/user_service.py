@@ -1,29 +1,13 @@
-# from app.services.users.repository.user_repository import get_user_by_id
-# from layers.common.psycopg.python.utils.exceptions import UserNotFoundError
 from repository.user_repository import get_user_by_id
 
-from utils.exceptions import UserNotFoundError
-# def fetch_user_by_email(email):
-
-#     user = get_user_by_email(email)
-
-#     if not user:
-#         raise UserNotFoundError()
-
-#     return {
-#         "id": str(user[0]),
-#         "name": user[1],
-#         "email": user[2],
-#         "role": user[3],
-#         "created_at": user[4].isoformat()
-#     }
+from utils.exceptions import NotFoundError
 
 def fetch_user(user_id):
 
     user = get_user_by_id(user_id)
 
     if not user:
-        raise UserNotFoundError()
+        raise NotFoundError("User not found")
 
     return {
         "id": str(user[0]),

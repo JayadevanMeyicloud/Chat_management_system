@@ -6,91 +6,67 @@ from repository.group_repository import (
     is_group_admin,
     delete_group,
     update_group_settings,
-    get_user_role
+    get_user_role,
 )
 
 from utils.exceptions import (
-    AdminOnlyActionError,
-    GroupAlreadyExistsError,
-    GroupNotFoundError,
-    GroupAccessDeniedError
+    NotFoundError, 
+    ForbiddenError, 
+    UnAuthorizedError
 )
 
 
-def create_new_group(
-    current_user_id,
-    name,
-    description
-):
+def create_new_group(current_user_id, name, description):
     role = get_user_role(current_user_id)
 
     if role != "admin":
-        raise AdminOnlyActionError()
+        raise UnAuthorizedError("you are not authorized to perform this action")
 
     existing_group = get_group_by_name(name)
 
     if existing_group:
-        raise GroupAlreadyExistsError()
+        raise NotFoundError("Group already exists")
 
-    return create_group(
-        name,
-        description,
-        current_user_id
-    )
+    return create_group(name, description, current_user_id)
 
-#Fetch all groups
+
+# Fetch all groups
 def fetch_groups():
     return get_groups()
 
 
-#Fetch group by id
+# Fetch group by id
 def fetch_group(group_id):
 
     group = get_group_by_id(group_id)
 
     if not group:
-        raise GroupNotFoundError()
+        raise NotFoundError("Group not found")
 
     return group
 
+
 # Admin only - Delete group
-def remove_group(
-    group_id,
-    current_user_id
-):
+def remove_group(group_id, current_user_id):
     group = get_group_by_id(group_id)
 
     if not group:
-        raise GroupNotFoundError()
+        raise NotFoundError("Group not found")
 
-    if not is_group_admin(
-        group_id,
-        current_user_id
-    ):
-        raise GroupAccessDeniedError()
+    if not is_group_admin(group_id, current_user_id):
+        raise ForbiddenError("only admin can perform this action")
 
     delete_group(group_id)
 
+
 # Admin only - Update settings
-def change_group_settings(
-    group_id,
-    current_user_id,
-    name,
-    description
-):
+def change_group_settings(group_id, current_user_id, name, description):
     group = get_group_by_id(group_id)
 
     if not group:
-        raise GroupNotFoundError()
+        raise NotFoundError("Group not found")
 
-    if not is_group_admin(
-        group_id,
-        current_user_id
-    ):
-        raise GroupAccessDeniedError()
+    if not is_group_admin(group_id, current_user_id):
+        raise ForbiddenError("only admin can perform this action")
 
-    return update_group_settings(
-        group_id,
-        name,
-        description
-    )
+    return update_group_settings(group_id, name, description)
