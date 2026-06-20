@@ -1,4 +1,3 @@
-
 from repository.groupMessage_repository import (
     is_duplicate_message,
     create_message,
@@ -11,42 +10,21 @@ from repository.groupMessage_repository import (
     is_group_member
 )
 
-from utils.exceptions import (
-    GroupNotFoundError,
-    GroupMembershipRequiredError,
-    GroupMessageNotFoundError,
-    GroupMessageDeleteForbiddenError,
-    DuplicateMessageError
+# from utils.exceptions import (
+#     GroupNotFoundError,
+#     GroupMembershipRequiredError,
+#     GroupMessageNotFoundError,
+#     UnAuthorizedError,
+#     DuplicateMessageError
+# )
+
+from utils.exceptions import(
+    InvalidRequestError,
+    ForbiddenError,
+    NotFoundError,
+    ConflictError
 )
 
-
-# =========================
-# SEND MESSAGE
-# =========================
-# def send_message(group_id, sender_id, content, client_message_id=None):
-
-#     group = get_group_by_id(group_id)
-#     if not group:
-#         raise GroupNotFoundError()
-
-#     member = is_group_member(group_id, sender_id)
-#     if not member:
-#         raise GroupMembershipRequiredError()
-
-#     if not content or not content.strip():
-#         raise Exception("Message content cannot be empty")
-
-#     if client_message_id:
-#         duplicate = is_duplicate_message(sender_id, client_message_id)
-#         if duplicate:
-#             raise DuplicateMessageError()
-
-#     return create_message(
-#         group_id=group_id,
-#         sender_id=sender_id,
-#         content=content,
-#         client_message_id=client_message_id
-#     )
 def send_message(
     group_id,
     sender_id,
@@ -57,22 +35,16 @@ def send_message(
     group = get_group_by_id(group_id)
 
     if not group:
-        raise GroupNotFoundError()
+        raise NotFoundError("Group Not Found Error")
 
     if not is_group_member(group_id, sender_id):
-        raise GroupMembershipRequiredError()
+        raise ForbiddenError("You are not a member of this group")
 
     if not content or not content.strip():
-        raise Exception("Message content cannot be empty")
+        raise InvalidRequestError("Message content cannot be empty")
 
-    if (
-        client_message_id and
-        is_duplicate_message(
-            sender_id,
-            client_message_id
-        )
-    ):
-        raise DuplicateMessageError()
+    if ( client_message_id and is_duplicate_message(sender_id,client_message_id)):
+        raise ConflictError("Duplicate message detected")
 
     message = create_message(
         group_id=group_id,
@@ -97,45 +69,37 @@ def send_message(
 
     return message
 
-
-# =========================
-# FETCH ALL MESSAGES
-# =========================
+#Fetch all Messages from group
 def fetch_messages(group_id, limit=50, offset=0):
 
     group = get_group_by_id(group_id)
     if not group:
-        raise GroupNotFoundError()
+        raise NotFoundError("Group Not Found ")
 
     return get_messages(group_id)
 
-
-# =========================
-# GET SINGLE MESSAGE
-# =========================
+#Get single message
 def get_message(message_id):
 
     message = get_message_by_id(message_id)
 
     if not message:
-        raise GroupMessageNotFoundError()
+        raise NotFoundError("Message not found")
 
     return message
 
-
-# =========================
-# DELETE MESSAGE
-# =========================
+#Delete Messages
 def delete_message_service(message_id, current_user_id):
 
     message = get_message_by_id(message_id)
 
     if not message:
-        raise GroupMessageNotFoundError()
+        raise NotFoundError("Message not found")
 
     # Only sender can delete
     if str(message["sender_id"]) != str(current_user_id):
-        raise GroupMessageDeleteForbiddenError()
+        raise ForbiddenError('You are not authorized to delete this message')
+    
 
     delete_message(message_id)
 

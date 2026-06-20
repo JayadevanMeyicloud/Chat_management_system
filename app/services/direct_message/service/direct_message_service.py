@@ -16,7 +16,7 @@ from utils.exceptions import (
     ChatAccessDeniedError,
     DuplicateMessageError,
     MessageNotFoundError,
-    MessageDeleteForbiddenError
+    UnAuthorizedError
 )
 
 
@@ -101,6 +101,6 @@ def remove_message(
     sender_id = str(message[1])
 
     if sender_id != user_id:
-        raise MessageDeleteForbiddenError()
+        raise UnAuthorizedError('You are not authorized to delete this message')
 
     delete_direct_message(message_id)

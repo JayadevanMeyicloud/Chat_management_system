@@ -1,22 +1,63 @@
+class AppError(Exception):
+    status_code = 500
+    default_message = "Internal Server Error"
+    
+    def __init__(self,message=None):
+        super().__init__(message or self.default_message)
+        
+class InvalidRequestError(AppError):
+    status_code = 400
+    default_message = "Invalid request"
+    
+# class InvalidRequestError(Exception):
+#     status_code = 400
+
+#     def __init__(self, message="Invalid request"):
+#         super().__init__(message)
+
+    
+class UnAuthorizedError(AppError):
+    status_code = 401
+    default_message = "UnAuthorized"
+    
+class ForbiddenError(AppError):
+    status_code = 403
+    default_message = "Forbidden"
+    
+class NotFoundError(AppError):
+    status_code = 404
+    default_message = "Not Found"
+    
+class ConflictError(AppError):
+    status_code = 409
+    default_message = "Conflict"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 class UserAlreadyExistsError(Exception):
     status_code = 409
 
     def __init__(self):
         super().__init__("User already exists")
 
-
 class InvalidPasswordError(Exception):
     status_code = 400
 
     def __init__(self):
         super().__init__("Password must contain uppercase, lowercase, number, special character and minimum 8 characters")
-
-
-class InvalidRequestError(Exception):
-    status_code = 400
-
-    def __init__(self, message="Invalid request"):
-        super().__init__(message)
 
 
 class InvalidCredentialsError(Exception):
@@ -38,41 +79,6 @@ class GroupNotFoundError(Exception):
     def __init__(self):
         super().__init__("Group not found")
 
-
-class GroupMembershipRequiredError(Exception):
-    status_code = 403
-
-    def __init__(self):
-        super().__init__(
-            "You are not a member of this group"
-        )
-
-
-class GroupMessageNotFoundError(Exception):
-    status_code = 404
-
-    def __init__(self):
-        super().__init__(
-            "Group message not found"
-        )
-
-
-class GroupMessageDeleteForbiddenError(Exception):
-    status_code = 403
-
-    def __init__(self):
-        super().__init__(
-            "You can delete only your own messages"
-        )
-
-
-class DuplicateMessageError(Exception):
-    status_code = 409
-
-    def __init__(self):
-        super().__init__(
-            "Duplicate message detected"
-        )
         
 class DirectChatAlreadyExistsError(Exception):
     status_code = 409
@@ -95,16 +101,6 @@ class ChatAccessDeniedError(Exception):
         super().__init__(
             "Forbidden. You are not a participant in this chat"
         )
-
-
-class DuplicateMessageError(Exception):
-    status_code = 409
-
-    def __init__(self):
-        super().__init__(
-            "Duplicate message. client_message_id already exists"
-        )
-
 
 class MessageNotFoundError(Exception):
     status_code = 404
