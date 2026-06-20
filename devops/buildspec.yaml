@@ -15,7 +15,7 @@ phases:
       - mkdir -p layers/common/python
       - cp -r app/core layers/common/python
       - cp -r app/utils layers/common/python
-      - pip install psycopg[binary] -t layers/common/python/
+      - pip install -r layers/common/requirements.txt -t layers/common/python/
 
   build:
     commands:
