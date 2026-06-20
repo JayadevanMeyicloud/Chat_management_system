@@ -13,15 +13,18 @@ def register_route(event, context):
         body.get("email"),
         body.get("password")
     )
-
-    return {"statusCode": 201, "body": "User registered successfully"}
-
+    
+    return {
+    "statusCode": 201,
+    "message": "User registered successfully",
+    "data": None
+}
 @router.get("/api/v1/auth/users/{user_id}")
 def get_user_route(event, context,user_id):
     
     response = fetch_user(user_id)
 
-    return {"statusCode": 200, "body": "User fetched successfully", 
+    return {"statusCode": 200, "message": "User fetched successfully", 
             "data":
                 {"user": response}
             }
@@ -35,7 +38,11 @@ def verify_route(event, context):
         body.get("otp")
     )
 
-    return {"statusCode": 200, "body": "User verified successfully"}
+    return {
+    "statusCode":200,
+    "message":"User verified successfully",
+    "data":None
+}
     
 @router.post("/api/v1/auth/login")
 def login_route(event, context):
