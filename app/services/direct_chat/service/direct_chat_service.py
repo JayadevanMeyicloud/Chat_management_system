@@ -8,7 +8,9 @@ from utils.exceptions import InvalidRequestError, ConflictError
 
 
 def create_chat(current_user_id, receiver_id):
-
+    # receiver_id mandatory
+    if not receiver_id:
+        raise InvalidRequestError("receiver_id is required")
     # Prevent users from creating a chat with themselves
     if current_user_id == receiver_id:
         raise InvalidRequestError("Cannot create chat with yourself")

@@ -23,7 +23,7 @@ def send_message(chat_id, sender_id, client_message_id, content):
         raise ForbiddenError("You are not a participant in this chat")
 
     if check_duplicate_message(sender_id, client_message_id):
-        raise InvalidRequestError("Duplicate message detected")
+        raise InvalidRequestError("Duplicate Message or client_message_id already exists")
 
     message = create_direct_message(chat_id, sender_id, client_message_id, content)
 

@@ -181,7 +181,7 @@ Resources:
       FunctionName: !Sub "chat-direct-message-lambda-${Stage}"
       CodeUri: ../app/services/direct_message
       Handler: direct_message_lambda.lambda_handler
-      Timeout: 15
+      Timeout: 20
       Layers:
         - !Ref PsycopgLayer
       Policies:

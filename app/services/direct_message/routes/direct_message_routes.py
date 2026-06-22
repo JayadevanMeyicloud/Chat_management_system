@@ -7,7 +7,7 @@ router = Router()
 @router.post("/api/v1/direct-chats/{chat_id}/messages")
 def send_message_route(event, context,chat_id):
     
-    body = event.get("body_data",{})
+    body = event.get("body_data") or {}
     current_user_id = event.get("current_user_id")
     
     response= send_message(
