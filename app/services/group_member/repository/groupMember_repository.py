@@ -1,26 +1,38 @@
 from core.database import get_connection
 
 
-def is_group_member(
-    group_id,
-    user_id
-):
+def get_user_by_cognito_sub(cognito_sub):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-
             cursor.execute(
                 """
-                SELECT 1
-                FROM group_members
-                WHERE group_id = %s
-                AND user_id = %s
+                SELECT *
+                FROM users
+                WHERE cognito_sub = %s
                 """,
-                (
-                    group_id,
-                    user_id
-                )
+                (cognito_sub,),
+            )
+
+            return cursor.fetchone()
+
+    finally:
+        connection.close()
+
+
+def get_user_by_id(user_id):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT id
+                FROM users
+                WHERE id = %s
+                """,
+                (user_id,),
             )
 
             return cursor.fetchone()
@@ -28,12 +40,32 @@ def is_group_member(
     finally:
         connection.close()
         
+def is_group_member(group_id, user_id):
+    connection = get_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT 1
+                FROM group_members
+                WHERE group_id = %s
+                AND user_id = %s
+                """,
+                (group_id, user_id),
+            )
+
+            return cursor.fetchone()
+
+    finally:
+        connection.close()
+
+
 def get_group_by_id(group_id):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-
             cursor.execute(
                 """
                 SELECT
@@ -46,7 +78,7 @@ def get_group_by_id(group_id):
                 WHERE id = %s
                 AND deleted_at IS NULL
                 """,
-                (group_id,)
+                (group_id,),
             )
 
             group = cursor.fetchone()
@@ -59,40 +91,17 @@ def get_group_by_id(group_id):
                 "name": group[1],
                 "description": group[2],
                 "created_by": str(group[3]),
-                "created_at": group[4].isoformat()
+                "created_at": group[4].isoformat(),
             }
 
     finally:
         connection.close()
-        
-# def get_group_members(group_id):
-#     connection = get_connection()
 
-#     try:
-#         with connection.cursor() as cursor:
-
-#             cursor.execute(
-#                 """
-#                 SELECT user_id
-#                 FROM group_members
-#                 WHERE group_id = %s
-#                 """,
-#                 (group_id,)
-#             )
-
-#             return [
-#                 str(member[0])
-#                 for member in cursor.fetchall()
-#             ]
-
-#     finally:
-#         connection.close()
 def get_group_members(group_id):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-
             cursor.execute(
                 """
                 SELECT
@@ -104,30 +113,23 @@ def get_group_members(group_id):
                     ON gm.user_id = u.id
                 WHERE gm.group_id = %s
                 """,
-                (group_id,)
+                (group_id,),
             )
 
             return [
-                {
-                    "id": str(member[0]),
-                    "name": member[1],
-                    "email": member[2]
-                }
+                {"id": str(member[0]), "name": member[1], "email": member[2]}
                 for member in cursor.fetchall()
             ]
 
     finally:
         connection.close()
-        
-def is_group_admin(
-    group_id,
-    user_id
-):
+
+
+def is_group_admin(group_id, user_id):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-
             cursor.execute(
                 """
                 SELECT id
@@ -136,26 +138,20 @@ def is_group_admin(
                 AND created_by = %s
                 AND deleted_at IS NULL
                 """,
-                (
-                    group_id,
-                    user_id
-                )
+                (group_id, user_id),
             )
 
             return cursor.fetchone()
 
     finally:
         connection.close()
-        
-def is_member_exists(
-    group_id,
-    user_id
-):
+
+
+def is_member_exists(group_id, user_id):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-
             cursor.execute(
                 """
                 SELECT 1
@@ -163,10 +159,7 @@ def is_member_exists(
                 WHERE group_id = %s
                 AND user_id = %s
                 """,
-                (
-                    group_id,
-                    user_id
-                )
+                (group_id, user_id),
             )
 
             return cursor.fetchone()
@@ -175,15 +168,11 @@ def is_member_exists(
         connection.close()
 
 
-def add_group_member(
-    group_id,
-    user_id
-):
+def add_group_member(group_id, user_id):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-
             cursor.execute(
                 """
                 INSERT INTO group_members (
@@ -197,10 +186,7 @@ def add_group_member(
                     user_id,
                     joined_at
                 """,
-                (
-                    group_id,
-                    user_id
-                )
+                (group_id, user_id),
             )
 
             member = cursor.fetchone()
@@ -210,74 +196,31 @@ def add_group_member(
             return {
                 "group_id": str(member[0]),
                 "user_id": str(member[1]),
-                "joined_at": member[2].isoformat()
+                "joined_at": member[2].isoformat(),
             }
 
     finally:
         connection.close()
 
-def remove_group_member(
-    group_id,
-    user_id
-):
+
+def remove_group_member(group_id, user_id):
     connection = get_connection()
 
     try:
         with connection.cursor() as cursor:
-
             cursor.execute(
                 """
                 DELETE FROM group_members
                 WHERE group_id = %s
                 AND user_id = %s
                 """,
-                (
-                    group_id,
-                    user_id
-                )
+                (group_id, user_id),
             )
 
             connection.commit()
 
     finally:
         connection.close()
-        
-def get_user_by_cognito_sub(cognito_sub):
-    connection = get_connection()
 
-    try:
-        with connection.cursor() as cursor:
 
-            cursor.execute(
-                """
-                SELECT *
-                FROM users
-                WHERE cognito_sub = %s
-                """,
-                (cognito_sub,)
-            )
 
-            return cursor.fetchone()
-
-    finally:
-        connection.close()
-
-def get_user_by_id(user_id):
-    connection = get_connection()
-
-    try:
-        with connection.cursor() as cursor:
-
-            cursor.execute(
-                """
-                SELECT id
-                FROM users
-                WHERE id = %s
-                """,
-                (user_id,)
-            )
-
-            return cursor.fetchone()
-
-    finally:
-        connection.close()
