@@ -62,7 +62,7 @@ def send_message(
     return message
 
 #Fetch all Messages from group
-def fetch_messages(group_id, limit=50, offset=0):
+def fetch_messages(group_id):
 
     group = get_group_by_id(group_id)
     if not group:
